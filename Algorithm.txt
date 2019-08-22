@@ -1,0 +1,9 @@
+A chaque lancement de programme Java, l'algorithme sera le suivant:
+
+
+
+1) "whitelist_generator.py" -> Afin de générer une white liste à partir des gens que je follow déjà (afin de ne jamais les unfollow)
+2) En boucle:
+	2.1) follow_user_followers.py
+	Si j'ai atteint un certain nombre de followings (la limite qui vaut 2000), alors:
+		2.2) unfollow_everyone.py
