@@ -3,14 +3,17 @@ package com.rb.instagramfollowerbooster.dao;
 import java.io.BufferedReader;
 import java.io.IOException;
 
+import org.springframework.stereotype.Component;
+
 import com.rb.instagramfollowerbooster.exceptions.NotImplementedException;
 import com.rb.instagramfollowerbooster.model.FileIdsList;
 
+@Component
 public class IdListFileDao extends FileDao<FileIdsList> {
 
 	@Override
-	public FileIdsList readFromFile(String path) throws NumberFormatException, IOException {
-		BufferedReader reader = getReaderForPath(path);
+	public FileIdsList readFromFile(FilesInfos fileInfo) throws NumberFormatException, IOException {
+		BufferedReader reader = getReaderForPath(fileInfo.getPath());
 		FileIdsList result = new FileIdsList();
 		
 		String currentLineRead;

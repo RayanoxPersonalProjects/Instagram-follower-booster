@@ -2,7 +2,6 @@ package com.rb.instagramfollowerbooster.dao;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -57,8 +56,8 @@ public abstract class FileDao<ContentFormatType> {
 		throw new NotImplementedException();
 	}
 	
-	public abstract ContentFormatType readFromFile(String path) throws NumberFormatException, IOException;
-	public abstract void writeToFile(String path, ContentFormatType content) throws NotImplementedException;
+	public abstract ContentFormatType readFromFile(FilesInfos fileInfo) throws NumberFormatException, IOException;
+	public abstract void writeToFile(String path, ContentFormatType content) throws NotImplementedException, IOException;
 	
 	
 	protected BufferedReader getReaderForPath(String path) throws IOException {
