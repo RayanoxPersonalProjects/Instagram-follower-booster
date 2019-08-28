@@ -21,4 +21,7 @@ args = parser.parse_args()
 bot = Bot()
 bot.login(username=args.u, password=args.p,
           proxy=args.proxy, use_cookie=True)
+		  
+bot.max_unfollows_per_day = 2000
+		  
 bot.unfollow_everyone()
