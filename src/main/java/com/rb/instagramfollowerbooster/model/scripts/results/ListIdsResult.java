@@ -8,9 +8,11 @@ public class ListIdsResult extends AbstractScriptResult<FileIdsList> {
 
 	private FileIdsList newFollowings;
 	
-	public ListIdsResult(boolean isSuccess, Set<Integer> newFollowings) {
-		super(isSuccess);
-		this.newFollowings = new FileIdsList(newFollowings);
+	public ListIdsResult(ErrorCode errorCode, Set<Integer> newFollowings) {
+		super(errorCode);		
+		
+		if(newFollowings != null)
+			this.newFollowings = new FileIdsList(newFollowings);
 	}
 
 	@Override

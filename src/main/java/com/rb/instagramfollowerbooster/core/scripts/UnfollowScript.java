@@ -1,24 +1,24 @@
 package com.rb.instagramfollowerbooster.core.scripts;
 
-import java.util.Collections;
-
 import org.springframework.stereotype.Component;
-
-import com.rb.instagramfollowerbooster.exceptions.NotImplementedException;
-import com.rb.instagramfollowerbooster.model.scripts.results.ListIdsResult;
+import com.rb.instagramfollowerbooster.model.scripts.inputs.ScriptInputDto;
+import com.rb.instagramfollowerbooster.model.scripts.results.BooleanValueResult;
+import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCode;
+import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCodeResult;
 
 @Component
-public class UnfollowScript extends AbstractScriptRunner<ListIdsResult> {
+public class UnfollowScript extends AbstractScriptRunner<ErrorCodeResult> {
 
 	@Override
-	public ListIdsResult getResult(String outputOfScript) {
-		try {
-			throw new NotImplementedException();
-		} catch (NotImplementedException e) {
-			e.printStackTrace();
-		}
-		
-		return new ListIdsResult(false, Collections.emptySet());
+	public ErrorCodeResult getResult(String outputOfScript, String outputErr) {
+		if(outputErr.contains("ERR") || outputErr.contains("Error:"))
+			return new ErrorCodeResult(ErrorCode.Unexpected_Error, outputOfScript, outputErr);
+		return new ErrorCodeResult(ErrorCode.None, outputOfScript, outputErr);
+	}
+
+	@Override
+	protected String[] getPythonAdditionnalParameters(ScriptInputDto inputDto) throws Exception {
+		return null;
 	}
 
 }

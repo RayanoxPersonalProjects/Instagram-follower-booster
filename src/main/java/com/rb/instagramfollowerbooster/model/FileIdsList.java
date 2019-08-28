@@ -29,4 +29,17 @@ public class FileIdsList {
 	public int getIDsCount() {
 		return userIdList.size();
 	}
+	
+	public Integer getLastId() {
+		if(this.getIDsCount() <= 0)
+			return null;
+		
+		return this.userIdList.get(getIDsCount()-1);
+	}
+	public Integer getBeforeLastId() {
+		if(this.getIDsCount() <= 1)
+			return null;
+		
+		return this.userIdList.get(getIDsCount()-2);
+	}
 }

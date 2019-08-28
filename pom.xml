@@ -34,6 +34,13 @@
 		  <artifactId>argparse4j</artifactId>
 		  <version>0.8.1</version>
 		</dependency>
+		
+		<!-- My own library -->
+		<dependency>
+			<groupId>com.rb.common</groupId>
+			<artifactId>Module_CommonTools</artifactId>
+			<version>0.0.1-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
 
 	<build>
@@ -41,6 +48,13 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+			  <groupId>org.apache.maven.plugins</groupId>
+			  <artifactId>maven-surefire-plugin</artifactId>
+			  <configuration>
+			    <testFailureIgnore>true</testFailureIgnore>
+			  </configuration>
 			</plugin>
 		</plugins>
 	</build>

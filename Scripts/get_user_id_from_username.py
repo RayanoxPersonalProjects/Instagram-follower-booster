@@ -15,21 +15,20 @@ parser = argparse.ArgumentParser(add_help=True)
 parser.add_argument('-u', type=str, help="username")
 parser.add_argument('-p', type=str, help="password")
 parser.add_argument('-proxy', type=str, help="proxy")
-parser.add_argument('-users', type=str, nargs='+', help='users')
+parser.add_argument('-usernameTarget', type=str, help='usernameTarget')
 args = parser.parse_args()
+
+# print('args.u = ' + args.u);
+# print('args.p = ' + args.p);
+# print('args.usernameTarget = ' + args.usernameTarget);
 
 bot = Bot()
 bot.login(username=args.u, password=args.p,
           proxy=args.proxy, use_cookie=True)
 
+userID = bot.get_user_id_from_username(args.usernameTarget)
 
-bot.max_following_to_followers_ratio = 200 # Enable to follow a user who has until 200 times more followings than followers.
-bot.max_followers_to_following_ratio = 200
-bot.filter_users_without_profile_photo=False
-bot.filter_private_users=False
-bot.filter_previously_followed=True
+print('userID = ' + userID)
+print('[[[' + userID + ']]]')
 
-	  
-for username in args.users:
-    bot.follow_followers(username)
-
+# print('Voila')
