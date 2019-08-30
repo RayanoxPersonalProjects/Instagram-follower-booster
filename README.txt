@@ -1,4 +1,4 @@
-A service that boosts your amount of follower on Instagram. Project not started, and will begin probably not soon. It will be based on one of these the libraries: "https://github.com/brunocvcunha/instagram4j", "https://github.com/instabot-py/instabot.py", "https://github.com/ricardojoserf/instagram-followers-bot", "https://github.com/instagrambot/instabot"
+A service that boosts your amount of follower on Instagram. A service that boosts your amount of follower on Instagram. The project uses the library "https://github.com/instagrambot/instabot" for the instagram client part.
 
 
 Requirements: To run the project, you must have installed the followings tools (commands) in your environment:
@@ -8,3 +8,5 @@ Requirements: To run the project, you must have installed the followings tools (
 	- python get-pip.py
  - instaboot
 	- pip install -U instabot
+ - My common library (own library with logging tools, file storing tool, etc.). Check it out and do a 'mvn install':
+ 	- https://github.com/RayanoxPersonalProjects/CommonTools
