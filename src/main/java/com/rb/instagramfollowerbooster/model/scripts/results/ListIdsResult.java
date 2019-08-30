@@ -8,7 +8,7 @@ public class ListIdsResult extends AbstractScriptResult<FileIdsList> {
 
 	private FileIdsList newFollowings;
 	
-	public ListIdsResult(ErrorCode errorCode, Set<Integer> newFollowings) {
+	public ListIdsResult(ErrorCode errorCode, Set<Long> newFollowings) {
 		super(errorCode);		
 		
 		if(newFollowings != null)

@@ -18,7 +18,7 @@ public class IdListFileDao extends FileDao<FileIdsList> {
 		
 		String currentLineRead;
 		while((currentLineRead = reader.readLine()) != null) {
-			int id = Integer.parseInt(currentLineRead);
+			long id = Long.parseLong(currentLineRead);
 			result.addUserId(id);
 		}
 		

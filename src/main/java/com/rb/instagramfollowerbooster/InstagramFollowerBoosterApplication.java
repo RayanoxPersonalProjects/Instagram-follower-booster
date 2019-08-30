@@ -25,6 +25,7 @@ import com.rb.common.api.logging.LogManager;
 import com.rb.common.api.logging.LoggingAction;
 import com.rb.common.exceptions.BadFormatPropertyException;
 import com.rb.common.exceptions.NotImplementedException;
+import com.rb.common.utils.ErrorBuilder;
 
 import net.sourceforge.argparse4j.ArgumentParsers;
 import net.sourceforge.argparse4j.inf.ArgumentParser;
@@ -73,7 +74,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		try {
 			bot.StartBooster(arguments.usernameToStartFrom, arguments.targetFollowerCount, arguments.forceStartANewUserInstance);
 		}catch(Exception e) {
-			this.logger.log(String.format("An exception was catched at the root of the program ! Closing program."), LogLevel.ERROR, LoggingAction.All);
+			this.logger.log(String.format("An exception was catched at the root of the program ! Closing program.   \r\nException: \r\n" + ErrorBuilder.formatStringException(e)), LogLevel.ERROR, LoggingAction.All);
 		}
 	}
 	

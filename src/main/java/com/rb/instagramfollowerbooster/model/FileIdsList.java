@@ -8,21 +8,21 @@ public class FileIdsList {
 	/**
 	 * A list containing the IDs of a set of instagram users
 	 */
-	ArrayList<Integer> userIdList;
+	ArrayList<Long> userIdList;
 	
 	public FileIdsList() {
 		this.userIdList = new ArrayList<>();
 	}
 	
-	public FileIdsList(Set<Integer> collection) {
+	public FileIdsList(Set<Long> collection) {
 		this.userIdList = new ArrayList<>(collection);
 	}
 	
-	public void addUserId(int id) {
+	public void addUserId(long id) {
 		this.userIdList.add(id);
 	}
 	
-	public ArrayList<Integer> getUserIdList() {
+	public ArrayList<Long> getUserIdList() {
 		return userIdList;
 	}
 	
@@ -30,13 +30,13 @@ public class FileIdsList {
 		return userIdList.size();
 	}
 	
-	public Integer getLastId() {
+	public Long getLastId() {
 		if(this.getIDsCount() <= 0)
 			return null;
 		
 		return this.userIdList.get(getIDsCount()-1);
 	}
-	public Integer getBeforeLastId() {
+	public Long getBeforeLastId() {
 		if(this.getIDsCount() <= 1)
 			return null;
 		

@@ -1,5 +1,6 @@
 package com.rb.instagramfollowerbooster.core;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -56,6 +57,11 @@ public class Bot {
 			idLastUserToProcess = scriptFacade.RunGetIdFromUsernameScript(usernameToStartFrom);
 			fileDataFacade.cleanWorkspace();
 			scriptFacade.RunWhitelistScript();
+		}else {
+			// Retrieve the last followed people from the 'followed' file
+			FileIdsList followings = fileDataFacade.readFollowedList();
+			idLastUserToProcess = followings.getLastId().toString();
+			idBeforeLastUserToProcess = followings.getBeforeLastId().toString();
 		}
 		
 		
@@ -98,7 +104,10 @@ public class Bot {
 			// -----
 			
 			FileIdsList followings = fileDataFacade.readFollowedList();
+			String idLastUserToProcessTmp = idLastUserToProcess;
 			idLastUserToProcess = followings.getLastId().toString();
+			if(idLastUserToProcess.equals(idLastUserToProcessTmp))
+				idLastUserToProcess = null;
 			idBeforeLastUserToProcess = followings.getBeforeLastId().toString();
 			
 			followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
@@ -118,11 +127,14 @@ public class Bot {
 		return nextDay.until(now, ChronoUnit.MILLIS);
 	}
 
-	private void notifyOfEnding(int followerCount2, int targetFollowerCount) {
+	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {
+		int followersCountAtStarting = fileDataFacade.readWhiteList().getIDsCount();
+		String resultResume = String.format("You started from %s followers and now you have %s followers (+ %d).", followersCountAtStarting, followerCount, (followersCountAtStarting - followerCount));
 		String endMessage = followerCount >= targetFollowerCount ?
 				"Congratulation ! You've just reached the goal of " + targetFollowerCount + " followers."
 				: "The instagram bot has just reached the maximum days limit of running, which is " + MAX_DAYS_RUNNING + " days.";
-		this.logger.log("END OF THE INSTAGRAM BOOSTER INSTANCE !   ---->   " + endMessage, LogLevel.INFO, LoggingAction.File, LoggingAction.Email);
+		
+		this.logger.log("END OF THE INSTAGRAM BOOSTER INSTANCE !   ---->   " + endMessage + "   ------   " + resultResume, LogLevel.INFO, LoggingAction.File, LoggingAction.Email);
 	}
 
 	

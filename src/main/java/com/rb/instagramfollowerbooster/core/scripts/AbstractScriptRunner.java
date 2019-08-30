@@ -54,13 +54,8 @@ public abstract class AbstractScriptRunner<ResultType> {
 		
 		ProcessBuilder builderProc = new ProcessBuilder(commandWithParameters);
 		builderProc.directory(workspace);
-//		builderProc.redirectError(new File("C:\\Users\\rbenhmidane\\Documents\\Repositories\\Instagram-follower-booster\\workspace\\TMP\\errors.txt"));
-//		builderProc.redirectInput(new File("C:\\Users\\rbenhmidane\\Documents\\Repositories\\Instagram-follower-booster\\workspace\\TMP\\input.txt"));
-//		builderProc.redirectOutput(new File("C:\\Users\\rbenhmidane\\Documents\\Repositories\\Instagram-follower-booster\\workspace\\TMP\\output.txt"));
-//		builderProc.
 		Process process = builderProc.start();
 		
-//		Process process = Runtime.getRuntime().exec(commandWithParameters, null, workspace);
 		if(!process.waitFor(TIMEOUT_FOLLOW_PROCESS, TimeUnit.HOURS))
 			process.destroyForcibly();
 		
