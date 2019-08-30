@@ -35,15 +35,16 @@ import net.sourceforge.argparse4j.inf.Namespace;
 @SpringBootApplication
 public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 
-	private final static String ARG_NAME_USERNAME_START_FROM = "fromUser";
-	private final static String ARG_NAME_TARGET_FOLLOWER_COUNT = "targetFollowers";
-	private final static String ARG_NAME_FORCE_START_NEW_INSTANCE = "forceNewStart";
-	private final static String ARG_NAME_MAIL_USERNAME = "mailUsername";
-	private final static String ARG_NAME_MAIL_PASSWORD = "mailPassword";
-	private final static String ARG_NAME_MAIL_RECIPIENTS = "mailRecipients";
-	public final static String ARG_NAME_PYTHON_PATH = "pythonFolderPath";
-	private final static String ARG_NAME_INSTAGRAM_USERNAME = "instaUsername";
-	private final static String ARG_NAME_INSTAGRAM_PASSWORD = "instaPassword";
+	private final static String ARG_NAME_USERNAME_START_FROM 					= "fromUser";
+	private final static String ARG_NAME_TARGET_FOLLOWER_COUNT 					= "targetFollowers";
+	private final static String ARG_NAME_FORCE_START_NEW_INSTANCE 				= "forceNewStart";
+	private final static String ARG_NAME_MAIL_USERNAME 							= "mailUsername";
+	private final static String ARG_NAME_MAIL_PASSWORD 							= "mailPassword";
+	public final static String ARG_NAME_MAIL_RECIPIENTS 						= "mailRecipients";
+	public final static String ARG_NAME_PYTHON_PATH 							= "pythonFolderPath";
+	private final static String ARG_NAME_INSTAGRAM_USERNAME 					= "instaUsername";
+	private final static String ARG_NAME_INSTAGRAM_PASSWORD 					= "instaPassword";
+//	public final static String ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS 	= "mailRecipientsImportantsNotifs";
 	
 	
 	@Autowired
@@ -69,7 +70,11 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		
 		ProgramInitialisation(arguments);
 		
-		bot.StartBooster(arguments.usernameToStartFrom, arguments.targetFollowerCount, arguments.forceStartANewUserInstance);
+		try {
+			bot.StartBooster(arguments.usernameToStartFrom, arguments.targetFollowerCount, arguments.forceStartANewUserInstance);
+		}catch(Exception e) {
+			this.logger.log(String.format("An exception was catched at the root of the program ! Closing program."), LogLevel.ERROR, LoggingAction.All);
+		}
 	}
 	
 	
@@ -117,8 +122,14 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		this.userSession.setInstaUsername(userNameInsta);
 		this.userSession.setInstaPassword(passwordInsta);
 		
+		// Notification mails
+//		if(arguments.mailRecipientsImportantsNotifs != null) {
+//			dataStorage.setData(ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS, arguments.getRecipientsImportantsNotifs());
+//		}
+			
 		
-		this.logger.log("Program well initialized", LogLevel.INFO, LoggingAction.File);
+		
+		this.logger.log("Program well initialized", LogLevel.INFO, LoggingAction.File, LoggingAction.Stdout);
 	}
 
 	
@@ -143,6 +154,9 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
         parser.addArgument("--" + ARG_NAME_MAIL_RECIPIENTS)
 				.required(false)
 		        .help("The recipients to send logging emails. If there are several adresses, they must be separated by commas.");
+//        parser.addArgument("--" + ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS)
+//				.required(false)
+//		        .help("The recipients to send only important notification emails. If there are several adresses, they must be separated by commas.");
         parser.addArgument("--" + ARG_NAME_PYTHON_PATH)
 				.required(false)
 		        .help("The path of the folder containing the 'python' executable. Please, the python version must be greater than 3.");
@@ -161,16 +175,17 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		String mailUsername = ns.getString(ARG_NAME_MAIL_USERNAME);
 		String mailPassword = ns.getString(ARG_NAME_MAIL_PASSWORD);
 		String mailRecipients = ns.getString(ARG_NAME_MAIL_RECIPIENTS);
+//		String mailRecipientsImportantsNotifs = ns.getString(ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS);
 		String pythonPath = ns.getString(ARG_NAME_PYTHON_PATH);
 		String instaUsername = ns.getString(ARG_NAME_INSTAGRAM_USERNAME);
 		String instaPassword = ns.getString(ARG_NAME_INSTAGRAM_PASSWORD);
 		
-		return new Arguments(usernameToStartFrom, targetFollowers, forceNewStart, mailUsername, mailPassword, mailRecipients, pythonPath, instaUsername, instaPassword);
+		return new Arguments(usernameToStartFrom, targetFollowers, forceNewStart, mailUsername, /*mailRecipientsImportantsNotifs, */mailPassword, mailRecipients, pythonPath, instaUsername, instaPassword);
 	}
 
 	
 	private static class Arguments{
-		public Arguments(String linkUserToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, String mailUsername, String mailPassword, String mailRecipients, String pythonPath, String instaUsername, String instaPassword) {
+		public Arguments(String linkUserToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, String mailUsername, String mailPassword, String mailRecipients, String pythonPath, String instaUsername, String instaPassword/*, String mailRecipientsImportantsNotifs*/) {
 			this.usernameToStartFrom = linkUserToStartFrom;
 			this.targetFollowerCount = targetFollowerCount;
 			this.forceStartANewUserInstance = forceStartANewUserInstance;
@@ -180,6 +195,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 			this.pythonPath = pythonPath;
 			this.instaUsername = instaUsername;
 			this.instaPassword = instaPassword;
+//			this.mailRecipientsImportantsNotifs = mailRecipientsImportantsNotifs;
 		}
 		public String usernameToStartFrom; 
 		public int targetFollowerCount;
@@ -190,9 +206,14 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		public String pythonPath;
 		public String instaUsername;
 		public String instaPassword;
+//		public String mailRecipientsImportantsNotifs;
 		
 		public ArrayList<String> getRecipients() {
 			return new ArrayList<String>(Arrays.asList(this.mailRecipients.split(",")));
 		}
+
+//		public ArrayList<String> getRecipientsImportantsNotifs() {
+//			return new ArrayList<String>(Arrays.asList(this.mailRecipientsImportantsNotifs.split(",")));
+//		}		
 	}
 }

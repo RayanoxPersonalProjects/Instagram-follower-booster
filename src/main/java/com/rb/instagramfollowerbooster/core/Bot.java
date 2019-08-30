@@ -1,5 +1,9 @@
 package com.rb.instagramfollowerbooster.core;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -10,6 +14,9 @@ import com.rb.instagramfollowerbooster.core.scripts.facade.ScriptFacade;
 import com.rb.instagramfollowerbooster.dao.FileDataFacade;
 import com.rb.instagramfollowerbooster.model.FileIdsList;
 import com.rb.instagramfollowerbooster.model.UserSession;
+import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCode;
+import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCodeResult;
+
 
 @Component
 public class Bot {
@@ -27,6 +34,9 @@ public class Bot {
 	
 	@Autowired
 	UserSession session;
+	
+	@Autowired
+	NotificationDelegate notifDelegate;
 
 	private int followerCount;
 	private int daysRunningCurrentInstance;
@@ -42,22 +52,16 @@ public class Bot {
 		String idLastUserToProcess = null, idBeforeLastUserToProcess = null;
 		
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
+			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
 			idLastUserToProcess = scriptFacade.RunGetIdFromUsernameScript(usernameToStartFrom);
 			fileDataFacade.cleanWorkspace();
 			scriptFacade.RunWhitelistScript();
 		}
 		
 		
-		//scriptFacade.RunWhitelistScript(); // Call taking some times (several seconds)
-		
-		//ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript("4782698845");
-		//ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
-		
-		
 		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
 		
 		while(followerCount < targetFollowerCount && daysRunningCurrentInstance <= MAX_DAYS_RUNNING) {
-			//TODO Gerer le cas ou un quota journalier est atteint dans un script (attente jusqu'au jour suivant normalement)
 			
 			String idToProcess; 
 			if(idLastUserToProcess != null) {
@@ -68,32 +72,50 @@ public class Bot {
 				idToProcess = idBeforeLastUserToProcess;
 			}
 			
+			// -----
+			// Start of cycle work (loop)
+			// -----
+			
+			ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
+			if(resultFollow.getErrorCode().equals(ErrorCode.Following_limit_Reached)) {
+				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
+				
+				if(!resultUnfollow.IsSuccess())
+					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
+				
+			}else if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
+				long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
+				this.logger.log(String.format("Day limit reached ! Gonna wait %l seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
+				Thread.sleep(millisToWaitBeforeNextDay);
+			}else if(resultFollow.getErrorCode().equals(ErrorCode.Unexpected_Error)) {
+				this.logger.log(String.format("Unexpected error occured after follow script execution ! \r\n\r\nScriptOutput(formatted) = %s\r\n\r\nEnd of program.", resultFollow.getFormattedOutputScript()), LogLevel.ERROR, LoggingAction.All);
+				return;
+			}
+				
+			
+			// -----
+			// End of cycle (loop)
+			// -----
 			
 			FileIdsList followings = fileDataFacade.readFollowedList();
 			idLastUserToProcess = followings.getLastId().toString();
 			idBeforeLastUserToProcess = followings.getBeforeLastId().toString();
+			
+			followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
+			// process Notifications
+			this.notifDelegate.processNotificationsIfNecessary(followerCount, targetFollowerCount);
 		}
 		
 		notifyOfEnding(followerCount, targetFollowerCount);
 		
 		
-		
-		
-		// Check if the whitelist file is not empty, otherwise call the appropriate script to fill it.
+	}
 
-		// Get from parameters an ID of a user I want to start the browse (or the url of the user, and I will retrieve the ID)
-		
-		// Loop (while follower count < targetFollowerCount or if MAX_DAYS_RUNNING has been reached)
-			// Check that the "following" file is empty, otherwise empty it.
-			// Call the "follow" script
-			// Retrieve all the following IDs from the "following" file
-			// Store (append) the IDs to a storage file (own file)
-			// Get the old total account data stored and add the new following count
-			// If a following limit has been reached, then process the "unfollow" script after getting last ID of the followings file
-		
-			// One time a day, Retrieve the new amount of followers and store it to a log file (specific to the follower count). => Statistics logger
-		
-		// Log some informations like the reason why the program stopped and a small recap of the statistics results 
+	private long getMillisBeforeNextDay() {
+		LocalDateTime now = LocalDateTime.now();
+		LocalDateTime tomorrowTime = now.plusDays(1);
+		LocalDate nextDay = LocalDate.of(tomorrowTime.getYear(), tomorrowTime.getMonth(), tomorrowTime.getDayOfMonth());
+		return nextDay.until(now, ChronoUnit.MILLIS);
 	}
 
 	private void notifyOfEnding(int followerCount2, int targetFollowerCount) {
@@ -103,4 +125,8 @@ public class Bot {
 		this.logger.log("END OF THE INSTAGRAM BOOSTER INSTANCE !   ---->   " + endMessage, LogLevel.INFO, LoggingAction.File, LoggingAction.Email);
 	}
 
+	
+	
+	
+	
 }
