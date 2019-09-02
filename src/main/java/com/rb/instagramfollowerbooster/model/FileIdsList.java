@@ -1,6 +1,7 @@
 package com.rb.instagramfollowerbooster.model;
 
 import java.util.ArrayList;
+import java.util.Random;
 import java.util.Set;
 
 public class FileIdsList {
@@ -41,5 +42,11 @@ public class FileIdsList {
 			return null;
 		
 		return this.userIdList.get(getIDsCount()-2);
+	}
+
+	public Long getRandomUser() {
+		Random random = new Random();
+		int randomIndex = random.nextInt(getIDsCount()-1);
+		return this.userIdList.get(randomIndex);
 	}
 }

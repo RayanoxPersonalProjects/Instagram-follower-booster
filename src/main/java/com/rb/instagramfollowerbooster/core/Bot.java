@@ -8,6 +8,7 @@ import java.time.temporal.ChronoUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.rb.common.api.datafilestorage.DataStorage;
 import com.rb.common.api.logging.LogLevel;
 import com.rb.common.api.logging.LogManager;
 import com.rb.common.api.logging.LoggingAction;
@@ -38,9 +39,12 @@ public class Bot {
 	
 	@Autowired
 	NotificationDelegate notifDelegate;
+	
+	@Autowired
+	DataStorage dataStorage;
 
 	private int followerCount;
-	private int daysRunningCurrentInstance;
+	private long daysRunningCurrentInstance = 0;
 	
 	/**
 	 *  Here is present the main algorithm of the bot
@@ -50,32 +54,35 @@ public class Bot {
 	 * @throws Exception 
 	 */
 	public void StartBooster(String usernameToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance) throws Exception {
-		String idLastUserToProcess = null, idBeforeLastUserToProcess = null;
+		String idLastUserToProcess = null, idBeforeLastUserToProcessRandom = null;
+		
+		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
+		
 		
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
 			idLastUserToProcess = scriptFacade.RunGetIdFromUsernameScript(usernameToStartFrom);
 			fileDataFacade.cleanWorkspace();
 			scriptFacade.RunWhitelistScript();
+			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
 		}else {
 			// Retrieve the last followed people from the 'followed' file
 			FileIdsList followings = fileDataFacade.readFollowedList();
 			idLastUserToProcess = followings.getLastId().toString();
-			idBeforeLastUserToProcess = followings.getBeforeLastId().toString();
+			idBeforeLastUserToProcessRandom = followings.getBeforeLastId().toString();
 		}
 		
 		
-		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
-		
+		LocalDate dayStartInstance = LocalDate.now();
 		while(followerCount < targetFollowerCount && daysRunningCurrentInstance <= MAX_DAYS_RUNNING) {
 			
 			String idToProcess; 
 			if(idLastUserToProcess != null) {
 				idToProcess = idLastUserToProcess;
 			}else {
-				if(idBeforeLastUserToProcess == null)
+				if(idBeforeLastUserToProcessRandom == null)
 					throw new Exception("Either the last user followed and the before-last one are nulls, meaning that there is no users in the 'followed.txt' file");
-				idToProcess = idBeforeLastUserToProcess;
+				idToProcess = idBeforeLastUserToProcessRandom;
 			}
 			
 			// -----
@@ -87,11 +94,11 @@ public class Bot {
 				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 				
 				if(!resultUnfollow.IsSuccess())
-					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
+					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All); //TODO Setter le lastUsToProcess
 				
 			}else if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
 				long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
-				this.logger.log(String.format("Day limit reached ! Gonna wait %l seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
+				this.logger.log(String.format("Day limit reached ! Gonna wait %d seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
 				Thread.sleep(millisToWaitBeforeNextDay);
 			}else if(resultFollow.getErrorCode().equals(ErrorCode.Unexpected_Error)) {
 				this.logger.log(String.format("Unexpected error occured after follow script execution ! \r\n\r\nScriptOutput(formatted) = %s\r\n\r\nEnd of program.", resultFollow.getFormattedOutputScript()), LogLevel.ERROR, LoggingAction.All);
@@ -108,11 +115,13 @@ public class Bot {
 			idLastUserToProcess = followings.getLastId().toString();
 			if(idLastUserToProcess.equals(idLastUserToProcessTmp))
 				idLastUserToProcess = null;
-			idBeforeLastUserToProcess = followings.getBeforeLastId().toString();
+			idBeforeLastUserToProcessRandom = followings.getRandomUser().toString();
 			
 			followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
 			// process Notifications
 			this.notifDelegate.processNotificationsIfNecessary(followerCount, targetFollowerCount);
+			
+			daysRunningCurrentInstance = dayStartInstance.until(LocalDate.now(), ChronoUnit.DAYS);
 		}
 		
 		notifyOfEnding(followerCount, targetFollowerCount);
@@ -122,9 +131,8 @@ public class Bot {
 
 	private long getMillisBeforeNextDay() {
 		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime tomorrowTime = now.plusDays(1);
-		LocalDate nextDay = LocalDate.of(tomorrowTime.getYear(), tomorrowTime.getMonth(), tomorrowTime.getDayOfMonth());
-		return nextDay.until(now, ChronoUnit.MILLIS);
+		LocalDateTime tomorrow = now.plusDays(1).truncatedTo(ChronoUnit.DAYS);
+		return now.until(tomorrow, ChronoUnit.MILLIS);
 	}
 
 	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {

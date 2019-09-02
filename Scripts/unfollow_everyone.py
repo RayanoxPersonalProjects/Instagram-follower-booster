@@ -25,3 +25,5 @@ bot.login(username=args.u, password=args.p,
 bot.max_unfollows_per_day = 2000
 		  
 bot.unfollow_everyone()
+
+exit(0)

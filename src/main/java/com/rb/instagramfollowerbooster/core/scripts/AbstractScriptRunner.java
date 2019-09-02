@@ -54,16 +54,18 @@ public abstract class AbstractScriptRunner<ResultType> {
 		
 		ProcessBuilder builderProc = new ProcessBuilder(commandWithParameters);
 		builderProc.directory(workspace);
+		builderProc.redirectErrorStream(true);
 		Process process = builderProc.start();
 		
-		if(!process.waitFor(TIMEOUT_FOLLOW_PROCESS, TimeUnit.HOURS))
-			process.destroyForcibly();
+//		if(!process.waitFor(TIMEOUT_FOLLOW_PROCESS, TimeUnit.HOURS))
+//			process.destroyForcibly();
 		
 		
 		
 		
 		String output = readContentOfOutputStream(process.getInputStream());
-		String outputErr = readContentOfOutputStream(process.getErrorStream());
+//		String outputErr = readContentOfOutputStream(process.getErrorStream());
+		String outputErr = output;
 		if(outputErr.contains("ERR") || outputErr.contains("Error:"))
 			logger.log("Error logs have been detected at the (err) output of the script " + scriptInfos.name() + ". More details: " + outputErr, LogLevel.ERROR, new LoggingAction[] {LoggingAction.File});
 		

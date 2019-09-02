@@ -16,7 +16,7 @@ public class NotificationDelegate {
 	private static final int PERIODIC_POURCENT_PROGRESSION_NOTIFICATION = 20; // Every 20 % of progression, a mail is sent to notify the advancement.
 
 	private static final String KEY_DAILY_NOTIF_LAST_DAY = "last_day_dailyNotif";
-	private static final String KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT = "last_follower_count";
+	static final String KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT = "last_follower_count";
 	private static final String KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION = "last_pourcent_progression";
 
 	
@@ -63,7 +63,7 @@ public class NotificationDelegate {
 		Integer newStep = lastPourcentStepProgression + PERIODIC_POURCENT_PROGRESSION_NOTIFICATION;
 		if(currentPourcentProgression > newStep) {
 //			loggerImportantNotifs.log(message, logLevel, loggingWay);
-			logger.log(String.format("Periodic step reached !  -> Step of %d % !", newStep), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
+			logger.log(String.format("Periodic step reached !  -> Step of %d %% (current followers count = %d / %d total followers goal)!", newStep, followerCount, targetFollowerCount), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
 			this.dataStorage.setData(KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION, newStep);
 		}
 		

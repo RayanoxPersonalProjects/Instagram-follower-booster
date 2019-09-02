@@ -33,3 +33,6 @@ bot.filter_previously_followed=True
 for username in args.users:
     bot.follow_followers(username)
 
+
+
+exit(0)

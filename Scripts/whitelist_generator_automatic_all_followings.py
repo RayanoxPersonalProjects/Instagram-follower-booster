@@ -55,3 +55,5 @@ with open("whitelist.txt", "a") as f:
         print("User with ID " + user_id + " ADDED.\r")
 
         time.sleep(DELAY_TIME_BETWEEN_ADDS)
+
+exit(0)

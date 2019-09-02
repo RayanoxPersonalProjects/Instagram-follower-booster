@@ -38,3 +38,5 @@ print('Follower count = ' + str(userInfos.get("follower_count")))
 print('[[[' + str(userInfos.get("follower_count")) + ']]]')
 
 # print('Voila')
+
+exit(0)

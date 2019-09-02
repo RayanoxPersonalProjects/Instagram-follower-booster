@@ -61,8 +61,10 @@ public abstract class FileDao<ContentFormatType> {
 	
 	
 	protected BufferedReader getReaderForPath(String path) throws IOException {
-		if(lastFilePathUsedForReading != null && lastFilePathUsedForReading.equals(path))
-			return this.reader;
+//		if(lastFilePathUsedForReading != null && lastFilePathUsedForReading.equals(path)) {
+//			this.reader.reset();//ICI a mettre autre chose
+//			return this.reader;
+//		}
 		
 		if(this.reader != null)
 			this.reader.close();
