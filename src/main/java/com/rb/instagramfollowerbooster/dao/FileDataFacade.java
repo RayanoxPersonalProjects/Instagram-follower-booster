@@ -49,7 +49,7 @@ public class FileDataFacade {
 		return true;
 	}
 
-	public void cleanWorkspace() throws FileNotFoundException {
+	public void cleanWorkspace(FilesInfos... filesToKeep) throws FileNotFoundException {
 		File workspaceDir = new File(FilesInfos.getBasepath());
 		if(!workspaceDir.exists())
 			throw new FileNotFoundException(String.format("The workspace folder (at expected location '%s') has not been found", FilesInfos.getBasepath()));
@@ -60,7 +60,8 @@ public class FileDataFacade {
 		File[] files = workspaceDir.listFiles();
 	    if(files!=null) { //some JVMs return null for empty dirs
 	        for(File f: files) {
-	            f.delete();
+	        	if(!FilesInfos.contains(f.getName(), filesToKeep)) //TODO: To test
+	        		f.delete();
 	        }
 	    }
 	}

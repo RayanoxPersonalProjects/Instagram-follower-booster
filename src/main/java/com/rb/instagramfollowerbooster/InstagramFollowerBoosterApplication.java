@@ -45,6 +45,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 	public final static String ARG_NAME_PYTHON_PATH 							= "pythonFolderPath";
 	private final static String ARG_NAME_INSTAGRAM_USERNAME 					= "instaUsername";
 	private final static String ARG_NAME_INSTAGRAM_PASSWORD 					= "instaPassword";
+	private final static String ARG_NAME_SKIP_WHITELIST_GENERATION 				= "skipWhitelistGeneration";
 //	public final static String ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS 	= "mailRecipientsImportantsNotifs";
 	
 	
@@ -72,7 +73,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		ProgramInitialisation(arguments);
 		
 		try {
-			bot.StartBooster(arguments.usernameToStartFrom, arguments.targetFollowerCount, arguments.forceStartANewUserInstance);
+			bot.StartBooster(arguments.usernameToStartFrom, arguments.targetFollowerCount, arguments.forceStartANewUserInstance, arguments.skipWhitelistGeneration);
 		}catch(Exception e) {
 			this.logger.log(String.format("An exception was catched at the root of the program ! Closing program.   \r\nException: \r\n" + ErrorBuilder.formatStringException(e)), LogLevel.ERROR, LoggingAction.All);
 		}
@@ -167,6 +168,10 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
         parser.addArgument("--" + ARG_NAME_INSTAGRAM_PASSWORD)
 				.required(false)
 		        .help("The pathword of the account you want to boost");
+        parser.addArgument("--" + ARG_NAME_SKIP_WHITELIST_GENERATION)
+        		.setDefault(false)
+        		.required(false)
+                .help("If true, the white list generation for a new bot instance will be skipped.");
         Namespace ns = null;
         
         ns = parser.parseArgsOrFail(args);
@@ -180,13 +185,14 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		String pythonPath = ns.getString(ARG_NAME_PYTHON_PATH);
 		String instaUsername = ns.getString(ARG_NAME_INSTAGRAM_USERNAME);
 		String instaPassword = ns.getString(ARG_NAME_INSTAGRAM_PASSWORD);
+		boolean skipWhitelistGeneration = Boolean.parseBoolean(ns.getString(ARG_NAME_SKIP_WHITELIST_GENERATION));
 		
-		return new Arguments(usernameToStartFrom, targetFollowers, forceNewStart, mailUsername, /*mailRecipientsImportantsNotifs, */mailPassword, mailRecipients, pythonPath, instaUsername, instaPassword);
+		return new Arguments(usernameToStartFrom, targetFollowers, forceNewStart, mailUsername, /*mailRecipientsImportantsNotifs, */mailPassword, mailRecipients, pythonPath, instaUsername, instaPassword, skipWhitelistGeneration);
 	}
 
 	
 	private static class Arguments{
-		public Arguments(String linkUserToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, String mailUsername, String mailPassword, String mailRecipients, String pythonPath, String instaUsername, String instaPassword/*, String mailRecipientsImportantsNotifs*/) {
+		public Arguments(String linkUserToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, String mailUsername, String mailPassword, String mailRecipients, String pythonPath, String instaUsername, String instaPassword/*, String mailRecipientsImportantsNotifs*/, boolean skipWhitelistGeneration) {
 			this.usernameToStartFrom = linkUserToStartFrom;
 			this.targetFollowerCount = targetFollowerCount;
 			this.forceStartANewUserInstance = forceStartANewUserInstance;
@@ -196,6 +202,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 			this.pythonPath = pythonPath;
 			this.instaUsername = instaUsername;
 			this.instaPassword = instaPassword;
+			this.skipWhitelistGeneration = skipWhitelistGeneration;
 //			this.mailRecipientsImportantsNotifs = mailRecipientsImportantsNotifs;
 		}
 		public String usernameToStartFrom; 
@@ -207,6 +214,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		public String pythonPath;
 		public String instaUsername;
 		public String instaPassword;
+		public boolean skipWhitelistGeneration;
 //		public String mailRecipientsImportantsNotifs;
 		
 		public ArrayList<String> getRecipients() {

@@ -14,6 +14,7 @@ import com.rb.common.api.logging.LogManager;
 import com.rb.common.api.logging.LoggingAction;
 import com.rb.instagramfollowerbooster.core.scripts.facade.ScriptFacade;
 import com.rb.instagramfollowerbooster.dao.FileDataFacade;
+import com.rb.instagramfollowerbooster.dao.FilesInfos;
 import com.rb.instagramfollowerbooster.model.FileIdsList;
 import com.rb.instagramfollowerbooster.model.UserSession;
 import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCode;
@@ -51,9 +52,10 @@ public class Bot {
 	 *  @param linkUserToStartFrom link of the account to start the massive follow from.
 	 *  @param targetFollowerCount The max follower count targeted before to stop the bot (if no other criteria is reached to stop the bot)
 	 *  @param forceStartANewUserInstance If true, a new empty instance will be started, cleaning all the previous datas. If false, a new running of the program will just continue where it last ended.  
+	 * @param skipWhitelistGeneration 
 	 * @throws Exception 
 	 */
-	public void StartBooster(String usernameToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance) throws Exception {
+	public void StartBooster(String usernameToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, boolean skipWhitelistGeneration) throws Exception {
 		String idLastUserToProcess = null, idBeforeLastUserToProcessRandom = null;
 		
 		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
@@ -62,8 +64,11 @@ public class Bot {
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
 			idLastUserToProcess = scriptFacade.RunGetIdFromUsernameScript(usernameToStartFrom);
-			fileDataFacade.cleanWorkspace();
-			scriptFacade.RunWhitelistScript();
+			if(skipWhitelistGeneration) {
+				scriptFacade.RunWhitelistScript();
+				fileDataFacade.cleanWorkspace(FilesInfos.WHITELIST);
+			}else
+				fileDataFacade.cleanWorkspace();
 			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
 		}else {
 			// Retrieve the last followed people from the 'followed' file

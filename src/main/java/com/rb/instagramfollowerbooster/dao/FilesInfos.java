@@ -7,11 +7,13 @@ public enum FilesInfos {
 	UNFOLLOWED("unfollowed.txt"),
 	FOLLOWINGS("followed.txt");
 		
+	private String fileName;
 	private String path;
 	private static final String basePath = "workspace";
 	
 	private FilesInfos(String fileName) {
 		this.path = basePath + File.separator + fileName;
+		this.fileName = fileName;
 	}
 	
 	
@@ -19,7 +21,19 @@ public enum FilesInfos {
 		return path;
 	}
 	
+	public String getFileName() {
+		return fileName;
+	}
+	
 	public static String getBasepath() {
 		return basePath;
+	}
+	
+	public static boolean contains(String fileName, FilesInfos... filesInfos) {
+		for (FilesInfos currentFilesInfo : filesInfos) {
+			if(currentFilesInfo.getFileName().equals(fileName))
+				return true;
+		}
+		return false;
 	}
 }
