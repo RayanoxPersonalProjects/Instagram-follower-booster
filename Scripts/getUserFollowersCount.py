@@ -8,6 +8,7 @@ import argparse
 import os
 import sys
 import json
+import logging
 
 sys.path.append(os.path.join(sys.path[0], '../'))
 from instabot import Bot
@@ -24,6 +25,11 @@ args = parser.parse_args()
 # print('args.usernameTarget = ' + args.usernameTarget);
 
 bot = Bot()
+
+# Change the file log name (because the default library implementation creates a new file for each bot, using the bot ID).
+logFileName = "[instabot_{}]".format(args.u)
+bot.api.logger = logging.getLogger(logFileName)
+
 bot.login(username=args.u, password=args.p,
           proxy=args.proxy, use_cookie=True)
 

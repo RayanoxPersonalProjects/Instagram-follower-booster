@@ -9,6 +9,7 @@ import os
 import random
 import argparse
 import time
+import logging
 
 sys.path.append(os.path.join(sys.path[0], '../../'))
 from instabot import Bot
@@ -36,6 +37,11 @@ exit()
 
 
 bot = Bot()
+
+# Change the file log name (because the default library implementation creates a new file for each bot, using the bot ID).
+logFileName = "[instabot_{}]".format(args.u)
+bot.api.logger = logging.getLogger(logFileName)
+
 bot.login(username=args.u, password=args.p, use_cookie=True)
 
 print("This script will generate whitelist.txt file with users"
