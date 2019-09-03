@@ -89,12 +89,16 @@ public class Bot {
 			// Start of cycle work (loop)
 			// -----
 			
+			this.logger.log(String.format("Starting the Follow from followers of user %s !", idToProcess), LogLevel.INFO, LoggingAction.Stdout);
 			ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
 			if(resultFollow.getErrorCode().equals(ErrorCode.Following_limit_Reached)) {
+				this.logger.log("Starting the Unfollow script !", LogLevel.INFO, LoggingAction.Stdout);
 				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 				
 				if(!resultUnfollow.IsSuccess())
-					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All); //TODO Setter le lastUsToProcess
+					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
+				else
+					this.logger.log("Unfollow successful !", LogLevel.INFO, LoggingAction.Stdout);
 				
 			}else if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
 				long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
@@ -122,6 +126,8 @@ public class Bot {
 			this.notifDelegate.processNotificationsIfNecessary(followerCount, targetFollowerCount);
 			
 			daysRunningCurrentInstance = dayStartInstance.until(LocalDate.now(), ChronoUnit.DAYS);
+			
+			this.logger.log(String.format("End of cycle. idLastUserToProcess = '%s', idBeforeLastUserToProcessRandom = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", idLastUserToProcess, idBeforeLastUserToProcessRandom, followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout);
 		}
 		
 		notifyOfEnding(followerCount, targetFollowerCount);
