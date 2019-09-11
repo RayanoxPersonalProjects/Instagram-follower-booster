@@ -26,6 +26,8 @@ public class Bot {
 	
 	public static final int MAX_DAYS_RUNNING = 30;
 	
+	public static final String KEY_STARTING_DATE = "starting_date";
+	
 	@Autowired
 	private FileDataFacade fileDataFacade;
 	
@@ -73,6 +75,7 @@ public class Bot {
 			}else
 				fileDataFacade.cleanWorkspace();
 			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
+			dataStorage.setData(KEY_STARTING_DATE, LocalDate.now().toString());
 		}else {
 			// Retrieve the last followed people from the 'followed' file
 			FileIdsList followings = fileDataFacade.readFollowedList();

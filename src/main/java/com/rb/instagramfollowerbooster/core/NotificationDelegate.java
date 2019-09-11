@@ -1,10 +1,9 @@
 package com.rb.instagramfollowerbooster.core;
 
 import java.time.LocalDate;
-
+import java.time.temporal.ChronoUnit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
 import com.rb.common.api.datafilestorage.DataStorage;
 import com.rb.common.api.logging.LogLevel;
 import com.rb.common.api.logging.LogManager;
@@ -19,7 +18,6 @@ public class NotificationDelegate {
 	static final String KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT = "last_follower_count";
 	private static final String KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION = "last_pourcent_progression";
 
-	
 	@Autowired
 	DataStorage dataStorage;
 	
@@ -62,11 +60,16 @@ public class NotificationDelegate {
 		
 		Integer newStep = lastPourcentStepProgression + PERIODIC_POURCENT_PROGRESSION_NOTIFICATION;
 		if(currentPourcentProgression > newStep) {
-//			loggerImportantNotifs.log(message, logLevel, loggingWay);
-			logger.log(String.format("Periodic step reached !  -> Step of %d %% (current followers count = %d / %d total followers goal)!", newStep, followerCount, targetFollowerCount), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
+			LocalDate startingDate = (LocalDate) dataStorage.getData(Bot.KEY_STARTING_DATE, LocalDate.class);
+			LocalDate endingDate = predictEndingDate(startingDate, targetFollowerCount, followerCount);
+			logger.log(String.format("Periodic step reached !  -> Step of %d %% (current followers count = %d / %d total followers goal)! Estimation date of the end = %s", newStep, followerCount, targetFollowerCount, endingDate.toString()), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
 			this.dataStorage.setData(KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION, newStep);
 		}
-		
-		// ArrayList<String> recipients = (ArrayList<String>) dataStorage.getData(InstagramFollowerBoosterApplication.ARG_NAME_MAIL_RECIPIENTS_ONLY_IMPORTANTS_MAILS, ArrayList);
+	}
+	
+	private LocalDate predictEndingDate(LocalDate startingDate, int followersTarget, int currentNbFollowers) {
+		long daysDone = startingDate.until(LocalDate.now(), ChronoUnit.DAYS);
+		long totalDaysEstimation = (daysDone * followersTarget) / currentNbFollowers;
+		return startingDate.plus(totalDaysEstimation, ChronoUnit.DAYS);
 	}
 }
