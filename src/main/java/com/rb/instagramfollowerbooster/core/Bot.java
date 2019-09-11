@@ -12,7 +12,7 @@ import com.rb.common.api.datafilestorage.DataStorage;
 import com.rb.common.api.logging.LogLevel;
 import com.rb.common.api.logging.LogManager;
 import com.rb.common.api.logging.LoggingAction;
-import com.rb.instagramfollowerbooster.core.scripts.facade.ScriptFacade;
+import com.rb.instagramfollowerbooster.core.facades.ScriptFacade;
 import com.rb.instagramfollowerbooster.dao.FileDataFacade;
 import com.rb.instagramfollowerbooster.dao.FilesInfos;
 import com.rb.instagramfollowerbooster.model.FileIdsList;
@@ -31,6 +31,9 @@ public class Bot {
 	
 	@Autowired
 	private ScriptFacade scriptFacade;
+	
+	@Autowired
+	UserPickerDelegate userPicker;
 	
 	@Autowired
 	LogManager logger;
@@ -89,6 +92,10 @@ public class Bot {
 					throw new Exception("Either the last user followed and the before-last one are nulls, meaning that there is no users in the 'followed.txt' file");
 				idToProcess = idBeforeLastUserToProcessRandom;
 			}
+			
+			idToProcess = userPicker.processUserPicking();
+			if(idToProcess == null)
+				continue;
 			
 			// -----
 			// Start of cycle work (loop)

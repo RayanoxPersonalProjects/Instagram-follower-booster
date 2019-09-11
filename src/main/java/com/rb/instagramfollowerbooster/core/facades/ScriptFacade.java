@@ -1,17 +1,14 @@
-package com.rb.instagramfollowerbooster.core.scripts.facade;
+package com.rb.instagramfollowerbooster.core.facades;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import com.rb.instagramfollowerbooster.core.scripts.FollowScript;
 import com.rb.instagramfollowerbooster.core.scripts.GetIdFromUsernameScript;
 import com.rb.instagramfollowerbooster.core.scripts.GetUserFollowerCount;
 import com.rb.instagramfollowerbooster.core.scripts.UnfollowScript;
 import com.rb.instagramfollowerbooster.core.scripts.WhiteListScript;
-import com.rb.instagramfollowerbooster.model.FileIdsList;
 import com.rb.instagramfollowerbooster.model.scripts.ScriptsInfos;
 import com.rb.instagramfollowerbooster.model.scripts.inputs.ScriptInputDto;
-import com.rb.instagramfollowerbooster.model.scripts.results.BooleanValueResult;
 import com.rb.instagramfollowerbooster.model.scripts.results.ErrorCodeResult;
 
 @Service
@@ -60,6 +57,5 @@ public class ScriptFacade {
 		input.usernameToGetFollowerCount= usernameToGetFollowerCount;
 		return this.getUserFollowerCount.processScript(ScriptsInfos.GET_USER_FOLLOWERS_COUNT, input).getDatasResult();
 	}
-	
 	
 }
