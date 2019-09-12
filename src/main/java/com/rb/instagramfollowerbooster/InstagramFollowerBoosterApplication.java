@@ -81,9 +81,7 @@ public class InstagramFollowerBoosterApplication implements CommandLineRunner{
 		}else 
 			System.out.println("Mail logger well loaded.");
 		
-		if(arguments.pythonPath == null && dataStorage.getData(ARG_NAME_PYTHON_PATH, String.class) == null) {
-			throw new Exception("The pythonPath argument must be set at least for the first execution. See the 'help' section for more details.");
-		}else if(arguments.pythonPath != null) {
+		if(arguments.pythonPath != null) {
 			if(arguments.pythonPath.endsWith(File.separator))
 				arguments.pythonPath = arguments.pythonPath.substring(0, arguments.pythonPath.length()-1);
 			dataStorage.setData(ARG_NAME_PYTHON_PATH, arguments.pythonPath);

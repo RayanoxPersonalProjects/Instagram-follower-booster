@@ -40,7 +40,10 @@ public abstract class AbstractScriptRunner<ResultType> {
 			throw new Exception("The login and/or the password (of instagram account) is missing to run the script.");
 		
 		String pythonDirPath = (String) dataStorage.getData(InstagramFollowerBoosterApplication.ARG_NAME_PYTHON_PATH, String.class);
-		String command = pythonDirPath + File.separator + "python .." + File.separator + scriptInfos.getPath();
+		String command = "python .." + File.separator + scriptInfos.getPath();
+		if(pythonDirPath != null && !pythonDirPath.isEmpty())
+			command = pythonDirPath + File.separator + command;
+			
 		String [] pythonArgs = new String [] {"-u", userSession.getInstaUsername(), "-p", userSession.getInstaPassword()};
 		pythonArgs = addArrayValuesToArray(pythonArgs, getPythonAdditionnalParameters(inputDto));
 		
