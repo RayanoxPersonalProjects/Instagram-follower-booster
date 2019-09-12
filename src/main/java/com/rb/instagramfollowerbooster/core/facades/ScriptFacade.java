@@ -57,5 +57,11 @@ public class ScriptFacade {
 		input.usernameToGetFollowerCount= usernameToGetFollowerCount;
 		return this.getUserFollowerCount.processScript(ScriptsInfos.GET_USER_FOLLOWERS_COUNT, input).getDatasResult();
 	}
+
+	public int RunGetUserFollowingCount(String usernameToGetFollowingCount) throws Exception {
+		ScriptInputDto input = new ScriptInputDto();
+		input.usernameToGetFollowerCount = usernameToGetFollowingCount;
+		return this.getUserFollowerCount.processScript(ScriptsInfos.GET_USER_FOLLOWING_COUNT, input).getDatasResult();
+	}
 	
 }

@@ -13,9 +13,6 @@ public class FollowScript extends AbstractScriptRunner<ErrorCodeResult> {
 //		if(isLimitDetectedAtEndOfScript(outputErr))
 //			return new BooleanValueResult(ErrorCode.Following_limit_Reached, false, outputOfScript, outputErr);
 		
-		if(outputErr.contains("following_count > bot.max_following_to_follow, skipping!"))
-			return new ErrorCodeResult(ErrorCode.Following_limit_Reached, outputOfScript, outputErr);
-		
 		if(outputErr.contains("Out of ") && outputErr.contains("for today."))
 			return new ErrorCodeResult(ErrorCode.Limit_Per_Day_Reached, outputOfScript, outputErr);
 		

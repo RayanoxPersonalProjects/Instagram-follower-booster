@@ -27,6 +27,8 @@ public class Bot {
 	public static final int MAX_DAYS_RUNNING = 30;
 	
 	public static final String KEY_STARTING_DATE = "starting_date";
+
+	private static final int MAX_DIFFERENCE_FOLLOWERS_FOLLOWINGS = 1000;
 	
 	@Autowired
 	private FileDataFacade fileDataFacade;
@@ -88,30 +90,38 @@ public class Bot {
 				continue;
 			}
 			
+			int followingCount = scriptFacade.RunGetUserFollowingCount(session.getInstaUsername());
+			boolean ownLimitReached = followingCount > followerCount + MAX_DIFFERENCE_FOLLOWERS_FOLLOWINGS;
 			
 			// -----
 			// Start of cycle work (loop)
 			// -----
 			
-			this.logger.log(String.format("Starting the Follow from followers of user %s !", idToProcess), LogLevel.INFO, LoggingAction.Stdout);
-			ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
-			if(resultFollow.getErrorCode().equals(ErrorCode.Following_limit_Reached)) {
-				this.logger.log("Starting the Unfollow script !", LogLevel.INFO, LoggingAction.Stdout);
+			if(!ownLimitReached) { // FOLLOW
+				
+				this.logger.log(String.format("Starting the Follow from followers of user %s !", idToProcess), LogLevel.INFO, LoggingAction.Stdout);
+				ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
+				
+				if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
+					long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
+					this.logger.log(String.format("Day limit reached ! Gonna wait %d seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
+					Thread.sleep(millisToWaitBeforeNextDay);
+				}else if(resultFollow.getErrorCode().equals(ErrorCode.Unexpected_Error)) {
+					this.logger.log(String.format("Unexpected error occured after follow script execution ! \r\n\r\nScriptOutput(formatted) = %s\r\n\r\nEnd of program.", resultFollow.getFormattedOutputScript()), LogLevel.ERROR, LoggingAction.All);
+					return;
+				}
+				
+			}else { // UNFOLLOW
+				this.logger.log(String.format("Own difference limit is reached ! -> followingCount = %d, followersCount = %d, MAX_DIFFERENCE = %d", followingCount, followerCount, MAX_DIFFERENCE_FOLLOWERS_FOLLOWINGS), LogLevel.INFO, LoggingAction.File, LoggingAction.Stdout);
+				this.logger.log("Starting the Unfollow script !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 				
 				if(!resultUnfollow.IsSuccess())
 					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
 				else
-					this.logger.log("Unfollow successful !", LogLevel.INFO, LoggingAction.Stdout);
-				
-			}else if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
-				long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
-				this.logger.log(String.format("Day limit reached ! Gonna wait %d seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
-				Thread.sleep(millisToWaitBeforeNextDay);
-			}else if(resultFollow.getErrorCode().equals(ErrorCode.Unexpected_Error)) {
-				this.logger.log(String.format("Unexpected error occured after follow script execution ! \r\n\r\nScriptOutput(formatted) = %s\r\n\r\nEnd of program.", resultFollow.getFormattedOutputScript()), LogLevel.ERROR, LoggingAction.All);
-				return;
+					this.logger.log("Unfollow successful !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 			}
+			
 				
 			
 			// -----
