@@ -60,15 +60,12 @@ public class Bot {
 	 * @param skipWhitelistGeneration 
 	 * @throws Exception 
 	 */
-	public void StartBooster(String usernameToStartFrom, int targetFollowerCount, boolean forceStartANewUserInstance, boolean skipWhitelistGeneration) throws Exception {
-		String idLastUserToProcess = null, idBeforeLastUserToProcessRandom = null;
-		
+	public void StartBooster(int targetFollowerCount, boolean forceStartANewUserInstance, boolean skipWhitelistGeneration) throws Exception {
 		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
 		
 		
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
-			idLastUserToProcess = scriptFacade.RunGetIdFromUsernameScript(usernameToStartFrom);
 			if(skipWhitelistGeneration) {
 				scriptFacade.RunWhitelistScript();
 				fileDataFacade.cleanWorkspace(FilesInfos.WHITELIST);
@@ -76,20 +73,19 @@ public class Bot {
 				fileDataFacade.cleanWorkspace();
 			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
 			dataStorage.setData(KEY_STARTING_DATE, LocalDate.now().toString());
-		}else {
-			// Retrieve the last followed people from the 'followed' file
-			FileIdsList followings = fileDataFacade.readFollowedList();
-			idLastUserToProcess = followings.getLastId().toString();
-			idBeforeLastUserToProcessRandom = followings.getBeforeLastId().toString();
 		}
 		
 		
-		LocalDate dayStartInstance = LocalDate.now();
+		LocalDate dayStartRunningInstance = LocalDate.now();
 		while(followerCount < targetFollowerCount && daysRunningCurrentInstance <= MAX_DAYS_RUNNING) {
 			
 			String idToProcess = userPicker.processUserPicking();
-			if(idToProcess == null)
+			if(idToProcess == null) {
+				int minutes = 30;
+				logger.log(String.format("Waiting for %d minutes because 'idToProcess' was null", minutes), LogLevel.WARN, LoggingAction.All);
+				Thread.sleep(minutes*60*1000);
 				continue;
+			}
 			
 			
 			// -----
@@ -126,9 +122,9 @@ public class Bot {
 			// process Notifications
 			this.notifDelegate.processNotificationsIfNecessary(followerCount, targetFollowerCount);
 			
-			daysRunningCurrentInstance = dayStartInstance.until(LocalDate.now(), ChronoUnit.DAYS);
+			daysRunningCurrentInstance = dayStartRunningInstance.until(LocalDate.now(), ChronoUnit.DAYS);
 			
-			this.logger.log(String.format("End of cycle. idLastUserToProcess = '%s', idBeforeLastUserToProcessRandom = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", idLastUserToProcess, idBeforeLastUserToProcessRandom, followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout);
+			this.logger.log(String.format("End of cycle. idLastUserToProcess = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", idToProcess, followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		}
 		
 		notifyOfEnding(followerCount, targetFollowerCount);

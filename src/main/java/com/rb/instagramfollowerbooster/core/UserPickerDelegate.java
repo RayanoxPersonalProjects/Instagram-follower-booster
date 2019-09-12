@@ -16,12 +16,14 @@ import com.rb.instagramfollowerbooster.model.rest.GeographicZone;
 public class UserPickerDelegate {
 	
 	private static final String KEY_ALREADY_PROCESSED_IDS = "alreadyProcessedIds";
+	private static final String KEY_FILTERED_IDS = "filteredIds";
+	private static final int FILTER_NB_FOLLOWERS_MAX = 2000; //To try to avoid the international people (who probably have too many followers)
 	
 	@Autowired
 	DataStorage dataStorage;
 	
-//	@Autowired
-//	ScriptFacade scriptFacade;
+	@Autowired
+	ScriptFacade scriptFacade;
 	
 	@Autowired
 	RestFacade restFacade;
@@ -35,16 +37,24 @@ public class UserPickerDelegate {
 	 * @throws Exception
 	 */
 	public String processUserPicking() throws Exception {
-		Collection<String> idList = this.restFacade.retrieveIdsFrom(GeographicZone.FRANCE_SOIREE);
-		idList = reverseListOrder(idList);
+		Collection<String> idList = this.restFacade.retrieveIdsFrom(GeographicZone.FRANCE_JOURNEE);
+		idList = reverseListOrder(idList); //TODO To comment
 		ArrayList<String> alreadyProcessedIds = (ArrayList<String>) dataStorage.getData(KEY_ALREADY_PROCESSED_IDS, ArrayList.class, new ArrayList<>());
+		ArrayList<String> filteredIds = (ArrayList<String>) dataStorage.getData(KEY_FILTERED_IDS, ArrayList.class, new ArrayList<>());
 		
 		//Returns the first ID which has not already been processed, or null if all the retrieved IDs have already been processed
 		for (String idRetrieved : idList) {
-			if(!alreadyProcessedIds.contains(idRetrieved)) {
-				alreadyProcessedIds.add(idRetrieved);
-				this.dataStorage.setData(KEY_ALREADY_PROCESSED_IDS, alreadyProcessedIds);
-				return idRetrieved;
+			if(!alreadyProcessedIds.contains(idRetrieved) && !filteredIds.contains(idRetrieved)) {
+				int nbFollowerCount = scriptFacade.RunGetUserFollowerCount(idRetrieved);
+				if(nbFollowerCount <= FILTER_NB_FOLLOWERS_MAX) {
+					alreadyProcessedIds.add(idRetrieved);
+					this.dataStorage.setData(KEY_ALREADY_PROCESSED_IDS, alreadyProcessedIds);
+					return idRetrieved;
+				}else {
+					filteredIds.add(idRetrieved);
+					this.dataStorage.setData(KEY_FILTERED_IDS, filteredIds);
+					Thread.sleep(2*1000);
+				}
 			}
 		}
 		this.logger.log(String.format("No User has been found in the picking process (total amount of userIds retrieved = %d)", idList.size()), LogLevel.WARN, LoggingAction.All);
