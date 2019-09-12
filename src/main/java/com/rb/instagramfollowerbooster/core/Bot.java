@@ -63,7 +63,6 @@ public class Bot {
 	public void StartBooster(int targetFollowerCount, boolean forceStartANewUserInstance, boolean skipWhitelistGeneration) throws Exception {
 		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
 		
-		
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
 			if(skipWhitelistGeneration) {
@@ -78,6 +77,8 @@ public class Bot {
 		
 		LocalDate dayStartRunningInstance = LocalDate.now();
 		while(followerCount < targetFollowerCount && daysRunningCurrentInstance <= MAX_DAYS_RUNNING) {
+			
+			fileDataFacade.cleanLoggingFiles();
 			
 			String idToProcess = userPicker.processUserPicking();
 			if(idToProcess == null) {

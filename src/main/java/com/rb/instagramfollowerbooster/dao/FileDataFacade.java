@@ -65,4 +65,21 @@ public class FileDataFacade {
 	        }
 	    }
 	}
+
+	public void cleanLoggingFiles() throws FileNotFoundException {
+		File workspaceDir = new File(FilesInfos.getBasepath());
+		if(!workspaceDir.exists())
+			throw new FileNotFoundException(String.format("The workspace folder (at expected location '%s') has not been found", FilesInfos.getBasepath()));
+		else
+			if(!workspaceDir.isDirectory())
+				throw new FileNotFoundException(String.format("The workspace folder (at expected location '%s') has not been found", FilesInfos.getBasepath()));
+				
+		File[] files = workspaceDir.listFiles();
+	    if(files!=null) { //some JVMs return null for empty dirs
+	        for(File f: files) {
+	        	if(f.getName().endsWith(".log"))
+	        		f.delete();
+	        }
+	    }
+	}
 }
