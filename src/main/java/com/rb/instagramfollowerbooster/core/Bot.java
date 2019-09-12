@@ -87,18 +87,10 @@ public class Bot {
 		LocalDate dayStartInstance = LocalDate.now();
 		while(followerCount < targetFollowerCount && daysRunningCurrentInstance <= MAX_DAYS_RUNNING) {
 			
-			String idToProcess; 
-			if(idLastUserToProcess != null) {
-				idToProcess = idLastUserToProcess;
-			}else {
-				if(idBeforeLastUserToProcessRandom == null)
-					throw new Exception("Either the last user followed and the before-last one are nulls, meaning that there is no users in the 'followed.txt' file");
-				idToProcess = idBeforeLastUserToProcessRandom;
-			}
-			
-			idToProcess = userPicker.processUserPicking();
+			String idToProcess = userPicker.processUserPicking();
 			if(idToProcess == null)
 				continue;
+			
 			
 			// -----
 			// Start of cycle work (loop)
@@ -129,12 +121,6 @@ public class Bot {
 			// End of cycle (loop)
 			// -----
 			
-			FileIdsList followings = fileDataFacade.readFollowedList();
-			String idLastUserToProcessTmp = idLastUserToProcess;
-			idLastUserToProcess = followings.getLastId().toString();
-			if(idLastUserToProcess.equals(idLastUserToProcessTmp))
-				idLastUserToProcess = null;
-			idBeforeLastUserToProcessRandom = followings.getRandomUser().toString();
 			
 			followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
 			// process Notifications
