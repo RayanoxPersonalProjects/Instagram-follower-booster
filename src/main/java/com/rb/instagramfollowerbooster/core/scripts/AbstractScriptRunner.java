@@ -42,7 +42,7 @@ public abstract class AbstractScriptRunner<ResultType> {
 		
 		String pythonDirPath = (String) dataStorage.getData(InstagramFollowerBoosterApplication.ARG_NAME_PYTHON_PATH, String.class);
 		
-		String command = "python";
+		String command = Globals.isWindowsEnvironment() ? "python" : "python3";
 		if(pythonDirPath != null && !pythonDirPath.isEmpty())
 			command = pythonDirPath + File.separator + command;
 		
