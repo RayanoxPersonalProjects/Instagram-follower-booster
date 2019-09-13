@@ -67,11 +67,12 @@ public class Bot {
 		
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
-			if(skipWhitelistGeneration) {
-				scriptFacade.RunWhitelistScript();
+			if(skipWhitelistGeneration)
 				fileDataFacade.cleanWorkspace(FilesInfos.WHITELIST);
-			}else
+			else {
 				fileDataFacade.cleanWorkspace();
+				scriptFacade.RunWhitelistScript();
+			}
 			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
 			dataStorage.setData(KEY_STARTING_DATE, LocalDate.now().toString());
 		}

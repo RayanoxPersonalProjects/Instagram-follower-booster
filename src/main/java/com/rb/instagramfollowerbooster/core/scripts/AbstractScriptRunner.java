@@ -19,6 +19,7 @@ import com.rb.instagramfollowerbooster.InstagramFollowerBoosterApplication;
 import com.rb.instagramfollowerbooster.model.UserSession;
 import com.rb.instagramfollowerbooster.model.scripts.ScriptsInfos;
 import com.rb.instagramfollowerbooster.model.scripts.inputs.ScriptInputDto;
+import com.rb.instagramfollowerbooster.utils.Globals;
 
 public abstract class AbstractScriptRunner<ResultType> {
 			
@@ -40,14 +41,22 @@ public abstract class AbstractScriptRunner<ResultType> {
 			throw new Exception("The login and/or the password (of instagram account) is missing to run the script.");
 		
 		String pythonDirPath = (String) dataStorage.getData(InstagramFollowerBoosterApplication.ARG_NAME_PYTHON_PATH, String.class);
-		String command = "python .." + File.separator + scriptInfos.getPath();
+		
+		String command = "python";
 		if(pythonDirPath != null && !pythonDirPath.isEmpty())
 			command = pythonDirPath + File.separator + command;
+		
+		String scriptPath = ".." + File.separator + scriptInfos.getPath();
 			
 		String [] pythonArgs = new String [] {"-u", userSession.getInstaUsername(), "-p", userSession.getInstaPassword()};
 		pythonArgs = addArrayValuesToArray(pythonArgs, getPythonAdditionnalParameters(inputDto));
 		
-		String[] commandWithParameters = { "cmd", "/C", command};
+		
+		String[] commandWithParameters;
+        if(Globals.isWindowsEnvironment())
+        	commandWithParameters = new String[] { "cmd", "/C", command, scriptPath};
+        else
+        	commandWithParameters = new String[] { command, scriptPath};
 		commandWithParameters = addArrayValuesToArray(commandWithParameters, pythonArgs);
 		File workspace = new File("workspace");
 		if(!workspace.exists())
