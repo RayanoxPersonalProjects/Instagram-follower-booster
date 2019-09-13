@@ -50,6 +50,9 @@ public class Bot {
 	
 	@Autowired
 	DataStorage dataStorage;
+	
+	@Autowired
+	WaiterDelegate waiterDelegate;
 
 	private int followerCount;
 	private long daysRunningCurrentInstance = 0;
@@ -64,7 +67,7 @@ public class Bot {
 	 */
 	public void StartBooster(int targetFollowerCount, boolean forceStartANewUserInstance, boolean skipWhitelistGeneration) throws Exception {
 		followerCount = scriptFacade.RunGetUserFollowerCount(session.getInstaUsername());
-		
+		this.waiterDelegate.waitUntil(LocalDateTime.of(2019, 9, 14, 12, 0));
 		if(forceStartANewUserInstance || !fileDataFacade.isWorkspaceStarted()){
 			this.logger.log("Congratulation ! A new instance of instagram follower booster is starting !", LogLevel.INFO, LoggingAction.All);
 			if(skipWhitelistGeneration)
@@ -87,7 +90,7 @@ public class Bot {
 			if(idToProcess == null) {
 				int minutes = 30;
 				logger.log(String.format("Waiting for %d minutes because 'idToProcess' was null", minutes), LogLevel.WARN, LoggingAction.All);
-				Thread.sleep(minutes*60*1000);
+				this.waiterDelegate.waitForMinutes(minutes);
 				continue;
 			}
 			
@@ -104,7 +107,7 @@ public class Bot {
 				ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
 				
 				if(resultFollow.getErrorCode().equals(ErrorCode.Limit_Per_Day_Reached)) {
-					long millisToWaitBeforeNextDay = getMillisBeforeNextDay();
+					long millisToWaitBeforeNextDay = this.waiterDelegate.getMillisBeforeNextDay();
 					this.logger.log(String.format("Day limit reached ! Gonna wait %d seconds before next day", millisToWaitBeforeNextDay / 1000), LogLevel.WARN, LoggingAction.File, LoggingAction.Stdout);
 					Thread.sleep(millisToWaitBeforeNextDay);
 				}else if(resultFollow.getErrorCode().equals(ErrorCode.Unexpected_Error)) {
@@ -114,6 +117,7 @@ public class Bot {
 				
 			}else { // UNFOLLOW
 				this.logger.log(String.format("Own difference limit is reached ! -> followingCount = %d, followersCount = %d, MAX_DIFFERENCE = %d", followingCount, followerCount, MAX_DIFFERENCE_FOLLOWERS_FOLLOWINGS), LogLevel.INFO, LoggingAction.File, LoggingAction.Stdout);
+				this.waiterDelegate.waitBeforeUnfollow();				
 				this.logger.log("Starting the Unfollow script !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 				
@@ -142,12 +146,6 @@ public class Bot {
 		notifyOfEnding(followerCount, targetFollowerCount);
 		
 		
-	}
-
-	private long getMillisBeforeNextDay() {
-		LocalDateTime now = LocalDateTime.now();
-		LocalDateTime tomorrow = now.plusDays(1).truncatedTo(ChronoUnit.DAYS);
-		return now.until(tomorrow, ChronoUnit.MILLIS);
 	}
 
 	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {
