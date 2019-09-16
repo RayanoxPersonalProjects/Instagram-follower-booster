@@ -2,6 +2,8 @@ package com.rb.instagramfollowerbooster.core.facades;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import com.rb.instagramfollowerbooster.core.WaiterDelegate;
 import com.rb.instagramfollowerbooster.core.scripts.FollowScript;
 import com.rb.instagramfollowerbooster.core.scripts.GetIdFromUsernameScript;
 import com.rb.instagramfollowerbooster.core.scripts.GetUserFollowerCount;
@@ -25,6 +27,9 @@ public class ScriptFacade {
 	@Autowired
 	private GetUserFollowerCount getUserFollowerCount;
 
+	@Autowired
+	WaiterDelegate waiterDelegate;
+
 	/**
 	 * 
 	 * @param userId The ID of the user you want to follow his followers.
@@ -32,12 +37,15 @@ public class ScriptFacade {
 	 * @throws Exception
 	 */
 	public ErrorCodeResult RunFollowingScript(String userId) throws Exception {
+		this.waiterDelegate.waitBeforeFollowIfNeeded();
+		
 		ScriptInputDto input = new ScriptInputDto();
 		input.userIdToFollowHisFollowers = userId;
 		return this.followRunner.processScript(ScriptsInfos.FOLLOW_USER_FOLLOWERS, input);
 	}
 	
 	public ErrorCodeResult RunUnfollowScript() throws Exception {
+		this.waiterDelegate.waitBeforeUnfollow();		
 		return this.unfollowRunner.processScript(ScriptsInfos.UNFOLLOW_EVERYONE, null);
 	}
 	

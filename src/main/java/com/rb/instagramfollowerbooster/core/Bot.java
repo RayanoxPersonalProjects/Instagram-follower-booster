@@ -50,10 +50,11 @@ public class Bot {
 	
 	@Autowired
 	DataStorage dataStorage;
-	
+
 	@Autowired
 	WaiterDelegate waiterDelegate;
-
+	
+	
 	private int followerCount;
 	private long daysRunningCurrentInstance = 0;
 	
@@ -103,8 +104,6 @@ public class Bot {
 			
 			if(!ownLimitReached) { // FOLLOW
 				
-				this.waiterDelegate.waitBeforeFollowIfNeeded();
-				
 				this.logger.log(String.format("Starting the Follow from followers of user %s !", idToProcess), LogLevel.INFO, LoggingAction.Stdout);
 				ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
 				
@@ -119,14 +118,9 @@ public class Bot {
 				
 			}else { // UNFOLLOW
 				this.logger.log(String.format("Own difference limit is reached ! -> followingCount = %d, followersCount = %d, MAX_DIFFERENCE = %d", followingCount, followerCount, MAX_DIFFERENCE_FOLLOWERS_FOLLOWINGS), LogLevel.INFO, LoggingAction.File, LoggingAction.Stdout);
-				this.waiterDelegate.waitBeforeUnfollow();				
+						
 				this.logger.log("Starting the Unfollow script !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
-				ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
-				
-				if(!resultUnfollow.IsSuccess())
-					this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
-				else
-					this.logger.log("Unfollow successful !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
+				processUnfollow();
 			}
 			
 				
@@ -145,10 +139,23 @@ public class Bot {
 			this.logger.log(String.format("End of cycle. idLastUserToProcess = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", idToProcess, followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		}
 		
+		this.logger.log("End of loop execution. Processing unfollowingsidLastUserToProcess = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
+		processUnfollow();
+		
 		notifyOfEnding(followerCount, targetFollowerCount);
 		
 		
 	}
+
+	private void processUnfollow() throws Exception {
+		ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
+		
+		if(!resultUnfollow.IsSuccess())
+			this.logger.log("Unsuccess unfollowed detected !", LogLevel.ERROR, LoggingAction.All);
+		else
+			this.logger.log("Unfollow successful !", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
+	}
+	
 
 	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {
 		int followersCountAtStarting = fileDataFacade.readWhiteList().getIDsCount();
