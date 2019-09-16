@@ -17,6 +17,24 @@ public class WaiterDelegate {
 	@Autowired
 	LogManager logger;
 	
+	
+	/**
+	 *  Algorithm of waiting before following depending on the current time.
+	 *  
+	 * @throws InterruptedException 
+	 */
+	public void waitBeforeFollowIfNeeded() throws InterruptedException {
+		LocalDateTime now = LocalDateTime.now();
+		int currentHour = now.get(ChronoField.HOUR_OF_DAY);
+		
+		if(currentHour >= 0 && currentHour < 8) {
+			LocalDateTime hourFollowingTimeOpened = now.truncatedTo(ChronoUnit.DAYS).withHour(8);
+			logger.log(String.format("Wait until %s.", hourFollowingTimeOpened.toString()), LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
+			this.waitUntil(hourFollowingTimeOpened);
+		}
+	}
+	
+	
 	/**
 	 * Algorithm of waiting before unfollowing depending on the current time.
 	 * 
@@ -90,6 +108,7 @@ public class WaiterDelegate {
 		LocalDateTime now = LocalDateTime.now();
 		return now.until(dateTime, ChronoUnit.MILLIS);
 	}
+
 
 	
 	

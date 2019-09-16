@@ -103,6 +103,8 @@ public class Bot {
 			
 			if(!ownLimitReached) { // FOLLOW
 				
+				this.waiterDelegate.waitBeforeFollowIfNeeded();
+				
 				this.logger.log(String.format("Starting the Follow from followers of user %s !", idToProcess), LogLevel.INFO, LoggingAction.Stdout);
 				ErrorCodeResult resultFollow = scriptFacade.RunFollowingScript(idToProcess);
 				
