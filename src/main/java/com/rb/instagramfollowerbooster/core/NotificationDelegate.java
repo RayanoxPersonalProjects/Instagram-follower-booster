@@ -17,6 +17,8 @@ public class NotificationDelegate {
 	private static final String KEY_DAILY_NOTIF_LAST_DAY = "last_day_dailyNotif";
 	static final String KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT = "last_follower_count";
 	private static final String KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION = "last_pourcent_progression";
+	
+	public static final String KEY_STARTING_FOLLOWERS_COUNT = "starting_folowers_count";
 
 	@Autowired
 	DataStorage dataStorage;
@@ -28,6 +30,7 @@ public class NotificationDelegate {
 	LogManager logger;
 	
 	public void processNotificationsIfNecessary(int followerCount, int targetFollowerCount) throws Exception {
+		
 		processPeriodicImportantNotifs(followerCount, targetFollowerCount);
 		processDailyNotifs(followerCount);
 	}
@@ -56,13 +59,16 @@ public class NotificationDelegate {
 	
 	private void processPeriodicImportantNotifs(int followerCount, int targetFollowerCount) throws Exception {
 		Integer lastPourcentStepProgression = (Integer) dataStorage.getData(KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION, Integer.class, 0);
-		Integer currentPourcentProgression = followerCount * 100 / targetFollowerCount;
+		Integer startingFollowerCount = (Integer) dataStorage.getData(KEY_STARTING_FOLLOWERS_COUNT, Integer.class);
+
+		int followerCountFromStart = startingFollowerCount - followerCount;
+		Integer currentPourcentProgression = followerCountFromStart * 100 / targetFollowerCount;
 		
 		Integer newStep = lastPourcentStepProgression + PERIODIC_POURCENT_PROGRESSION_NOTIFICATION;
 		if(currentPourcentProgression > newStep) {
 			LocalDate startingDate = (LocalDate) dataStorage.getData(Bot.KEY_STARTING_DATE, LocalDate.class);
-			LocalDate endingDate = predictEndingDate(startingDate, targetFollowerCount, followerCount);
-			logger.log(String.format("Periodic step reached !  -> Step of %d %% (current followers count = %d / %d total followers goal)! Estimation date of the end = %s", newStep, followerCount, targetFollowerCount, endingDate.toString()), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
+			LocalDate endingDate = predictEndingDate(startingDate, targetFollowerCount, followerCountFromStart);
+			logger.log(String.format("Periodic step reached !  -> Step of %d %% (current followers count = %d / %d total followers goal)! Estimation date of the end = %s", newStep, followerCountFromStart, targetFollowerCount, endingDate.toString()), LogLevel.INFO, LoggingAction.Email, LoggingAction.File, LoggingAction.Stdout);
 			this.dataStorage.setData(KEY_DAILY_NOTIF_LAST_POURCENT_STEP_PROGRESSION, newStep);
 		}
 	}

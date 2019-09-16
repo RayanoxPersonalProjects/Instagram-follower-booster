@@ -78,6 +78,7 @@ public class Bot {
 				scriptFacade.RunWhitelistScript();
 			}
 			dataStorage.setData(NotificationDelegate.KEY_DAILY_NOTIF_LAST_FOLLOWERS_COUNT, followerCount);
+			dataStorage.setData(NotificationDelegate.KEY_STARTING_FOLLOWERS_COUNT, followerCount);
 			dataStorage.setData(KEY_STARTING_DATE, LocalDate.now().toString());
 		}
 		
