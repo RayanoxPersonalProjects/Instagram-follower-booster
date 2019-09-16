@@ -46,7 +46,7 @@ public class ScriptFacade {
 	
 	public ErrorCodeResult RunUnfollowScript() throws Exception {
 		this.waiterDelegate.waitBeforeUnfollow();		
-		return this.unfollowRunner.processScript(ScriptsInfos.UNFOLLOW_EVERYONE, null);
+		return this.unfollowRunner.processScript(ScriptsInfos.UNFOLLOW_NON_FOLLOWERS, null);
 	}
 	
 	public Boolean RunWhitelistScript() throws Exception {
