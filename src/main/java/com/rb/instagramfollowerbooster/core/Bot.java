@@ -140,7 +140,7 @@ public class Bot {
 			this.logger.log(String.format("End of cycle. idLastUserToProcess = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", idToProcess, followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		}
 		
-		this.logger.log("End of loop execution. Processing unfollowingsidLastUserToProcess = '%s', followerCount = '%d', daysRunningCurrentInstance = '%d'", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
+		this.logger.log(String.format("End of loop execution. Processing unfollowings. FollowerCount = '%d', daysRunningCurrentInstance = '%d'", followerCount, daysRunningCurrentInstance), LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		processUnfollow();
 		
 		notifyOfEnding(followerCount, targetFollowerCount);
@@ -149,6 +149,7 @@ public class Bot {
 	}
 
 	private void processUnfollow() throws Exception {
+		this.logger.log("Sarting last unfollowings.", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 		
 		if(!resultUnfollow.IsSuccess())
@@ -160,7 +161,7 @@ public class Bot {
 
 	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {
 		int followersCountAtStarting = fileDataFacade.readWhiteList().getIDsCount();
-		String resultResume = String.format("You started from %s followers and now you have %s followers (+ %d).", followersCountAtStarting, followerCount, (followersCountAtStarting - followerCount));
+		String resultResume = String.format("You started from %s followers and now you have %s followers (+ %d).", followersCountAtStarting, followerCount, (followerCount - followersCountAtStarting));
 		String endMessage = followerCount >= targetFollowerCount ?
 				"Congratulation ! You've just reached the goal of " + targetFollowerCount + " followers."
 				: "The instagram bot has just reached the maximum days limit of running, which is " + MAX_DAYS_RUNNING + " days.";
