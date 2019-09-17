@@ -12,6 +12,8 @@ import com.rb.common.api.datafilestorage.DataStorage;
 import com.rb.common.api.logging.LogLevel;
 import com.rb.common.api.logging.LogManager;
 import com.rb.common.api.logging.LoggingAction;
+import com.rb.common.exceptions.BadFormatPropertyException;
+import com.rb.common.exceptions.NotImplementedException;
 import com.rb.instagramfollowerbooster.core.facades.ScriptFacade;
 import com.rb.instagramfollowerbooster.dao.FileDataFacade;
 import com.rb.instagramfollowerbooster.dao.FilesInfos;
@@ -160,8 +162,8 @@ public class Bot {
 	}
 	
 
-	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException {
-		int followersCountAtStarting = fileDataFacade.readWhiteList().getIDsCount();
+	private void notifyOfEnding(int followerCount, int targetFollowerCount) throws NumberFormatException, IOException, NotImplementedException, BadFormatPropertyException {
+		Integer followersCountAtStarting = (Integer) dataStorage.getData(NotificationDelegate.KEY_STARTING_FOLLOWERS_COUNT, Integer.class);
 		String resultResume = String.format("You started from %s followers and now you have %s followers (+ %d).", followersCountAtStarting, followerCount, (followerCount - followersCountAtStarting));
 		String endMessage = followerCount >= targetFollowerCount ?
 				"Congratulation ! You've just reached the goal of " + targetFollowerCount + " followers."
