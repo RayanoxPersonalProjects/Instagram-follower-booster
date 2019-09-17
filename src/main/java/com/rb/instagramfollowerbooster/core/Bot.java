@@ -149,6 +149,7 @@ public class Bot {
 	}
 
 	private void processUnfollow() throws Exception {
+		this.waiterDelegate.waitBeforeUnfollow();
 		this.logger.log("Sarting last unfollowings.", LogLevel.INFO, LoggingAction.Stdout, LoggingAction.File);
 		ErrorCodeResult resultUnfollow = scriptFacade.RunUnfollowScript();
 		
