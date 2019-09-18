@@ -11,6 +11,9 @@ public class UnfollowScript extends AbstractScriptRunner<ErrorCodeResult> {
 
 	@Override
 	public ErrorCodeResult getResult(String outputOfScript, String outputErr) {
+		if(outputErr.contains("Out of ") && outputErr.contains("for today."))
+			return new ErrorCodeResult(ErrorCode.Limit_Per_Day_Reached, outputOfScript, outputErr);
+		
 		if(outputErr.contains("ERR") || outputErr.contains("Error:"))
 			return new ErrorCodeResult(ErrorCode.Unexpected_Error, outputOfScript, outputErr);
 		return new ErrorCodeResult(ErrorCode.None, outputOfScript, outputErr);

@@ -28,7 +28,7 @@ bot.api.logger = logging.getLogger(logFileName)
 bot.login(username=args.u, password=args.p,
           proxy=args.proxy, use_cookie=True)
 		  
-bot.max_unfollows_per_day = 2000
+bot.max_per_day['unfollows'] = 2000
 		  
 bot.unfollow_non_followers()
 
